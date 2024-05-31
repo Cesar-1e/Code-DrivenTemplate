@@ -15,6 +15,10 @@
 <body>
     <section>
         <input type="file" multiple id="fileImages" accept="image/*" onchange="addImages()">
+        <label>Anchura Canva</label>
+        <input type="number" min="1" value="1125" id="widthCanva">
+        <label>Altura Canva</label>
+        <input type="number" min="1" value="900" id="heightCanva">
         <table class="table table-responsive table-striped table-bordered table-hover " id="tblImages"
             style="border-radius: 10px;" data-hidden-search-col="true">
             <thead class="text-center">

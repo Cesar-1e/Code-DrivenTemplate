@@ -119,7 +119,7 @@ function getDatatableFindById(id, messageError) {
 function makeEditableDatatable(dt, options = {
     inputs: [],
     isAll: false
-}, fun = (dt, row, rowIndex, _cellIndex) => { }) {
+}, fun = (dt, row, rowIndex, _cellIndex) => {}) {
     var auxFun = fun;
     var auxOptions = options;
     if (!(auxOptions.isAll === true)) {
@@ -129,7 +129,7 @@ function makeEditableDatatable(dt, options = {
         });
     }
     dt.dom.ondblclick = (event) => {
-        var visibleToColumnIndex = function (visibleIndex, columns) {
+        var visibleToColumnIndex = function(visibleIndex, columns) {
             let counter = 0
             let columnIndex = 0
             while (counter < (visibleIndex + 1)) {
@@ -158,7 +158,9 @@ function makeEditableDatatable(dt, options = {
             } else {
                 conf = {};
             }
-            if (conf?.isCancelledBefore == true) return;
+            if(typeof conf.isCancelledBefore != "undefined"){
+                if (conf.isCancelledBefore(dt, cell.parentNode.dataset.index, cellIndexDt) == true) return;
+            }
         }
 
         var updatedCell = (input, cell) => {
@@ -183,10 +185,7 @@ function makeEditableDatatable(dt, options = {
             };
             if (!isValid()) {
                 input.focus();
-                alert.fire({
-                    title: input.dataset.messages_invalid,
-                    icon: "info"
-                });
+                alert(input.dataset.messages_invalid);
                 return;
             }
             let dt = getDatatableFindById(input.dataset.idTable, "No podemos aplicar los cambios porque no encontramos el datatable");
@@ -196,21 +195,21 @@ function makeEditableDatatable(dt, options = {
             value = (isInteger ? parseFloat(value) : value);
             let valuesBefore = null;
             if (typeof conf.accessPathValue == "undefined") {
-                valuesBefore = row[input.dataset.cellIndexDt].data;
+                valuesBefore = row.cells[input.dataset.cellIndexDt].data;
             } else {
-                valuesBefore = eval("row[input.dataset.cellIndexDt].data." + conf.accessPathValue.join("."));
+                valuesBefore = eval("row.cells[input.dataset.cellIndexDt].data." + conf.accessPathValue.join("."));
             }
             input.parentNode.innerText = value;
             cell.innerHTML = input.dataset.valueVisible;
             let applyUpdate = () => {
                 if (typeof conf.accessPathValue == "undefined") {
-                    valuesBefore = row[input.dataset.cellIndexDt].data;
-                    row[input.dataset.cellIndexDt] = value;
+                    valuesBefore = row.cells[input.dataset.cellIndexDt].data;
+                    row.cells[input.dataset.cellIndexDt] = value;
                 } else {
-                    valuesBefore = eval("row[input.dataset.cellIndexDt].data." + conf.accessPathValue.join("."));
-                    eval("row[input.dataset.cellIndexDt].data." + conf.accessPathValue.join(".") + " = value;");
+                    valuesBefore = eval("row.cells[input.dataset.cellIndexDt].data." + conf.accessPathValue.join("."));
+                    eval("row.cells[input.dataset.cellIndexDt].data." + conf.accessPathValue.join(".") + " = value;");
                 }
-                dt.rows.updateRow(input.dataset.rowIndex, row);
+                dt.rows.updateRow(input.dataset.rowIndex, row.cells);
                 dt.options.makeEditable(dt, dt.data.data[input.dataset.rowIndex], parseInt(input.dataset.rowIndex), parseInt(input.dataset.cellIndexDt));
             }
             if (typeof conf.isCancelledAfter == "undefined") {
@@ -245,7 +244,7 @@ function makeEditableDatatable(dt, options = {
             }
         }
         if (conf.nodeName == "INPUT") {
-            let value = dt.data.data[cell.parentNode.dataset.index][cellIndexDt].data;
+            let value = dt.data.data[cell.parentNode.dataset.index].cells[cellIndexDt].data;
             conf.accessPathValue?.forEach(x => value = value[x]);
             input.value = value;
             input.dataset.previousValue = input.value;
@@ -273,7 +272,7 @@ function makeEditableDatatable(dt, options = {
         cell.innerText = "";
         cell.appendChild(input);
         if (conf.nodeName == "SELECT") {
-            input.value = dt.data.data[cell.parentNode.dataset.index][cellIndexHTML].data;
+            input.value = dt.data.data[cell.parentNode.dataset.index].cells[cellIndexHTML].data;
             input.dataset.previousValue = input.value;
         }
         conf?.fun?.options?.init(input.value, input.options);

@@ -1,16 +1,49 @@
 let dtImages, lienzo;
-let backgroundImage = new Image();
 let inProcessImage = [];
-backgroundImage.src = "./cumpleanios/fondoCumpleanioEmpleado.png";
-let imageFelizCumpleanio = new Image();
-imageFelizCumpleanio.src = "./cumpleanios/felizcumpleaniosTarjeta.png";
 
 onload(() => {
-    canvasPreview.width = 1125;
-    canvasPreview.height = 900;
     lienzo = canvasPreview.getContext("2d");
     dtImages = initDataTable("#tblImages", true, {
+        paging: false,
+        searchable: false,
+        sortable: false,
         columns: [{
+            select: 0,
+            type: "number",
+            render: (value, cell, dataIndex, _cellIndex) => {
+                if (dtImages.data.data.length == 0) return;
+                value = dataIndex + 1;
+                cell.childNodes = [{
+                    nodeName: "SPAN",
+                    childNodes: [{
+                        nodeName: "#text",
+                        data: value
+                    }, {
+                        nodeName: "BUTTON",
+                        attributes: {
+                            "data-row": dataIndex,
+                            onclick: "moveLayer(this, -1)",
+                            style: (dataIndex == 0 ? "display: none;" : "")
+                        },
+                        childNodes: [{
+                            nodeName: "#text",
+                            data: "🔺"
+                        }]
+                    }, {
+                        nodeName: "BUTTON",
+                        attributes: {
+                            "data-row": dataIndex,
+                            onclick: "moveLayer(this, 1)",
+                            style: (dataIndex == dtImages.data.data.length - 1 ? "display: none;" : "")
+                        },
+                        childNodes: [{
+                            nodeName: "#text",
+                            data: "🔻"
+                        }]
+                    }]
+                }]
+            }
+        }, {
             select: 1,
             type: "other",
             render: (value, cell, dataIndex, _cellIndex) => {
@@ -24,25 +57,40 @@ onload(() => {
                 }]
             }
         }, {
-            select: [2,3,4,5],
+            select: [2, 3, 4, 5],
             type: "number"
         }]
     }, { csv: false });
     dtImages.on('datatable.update', () => {
+        canvasPreview.width = widthCanva.value;
+        canvasPreview.height = heightCanva.value;
         lienzo.clearRect(0, 0, canvasPreview.clientWidth, canvasPreview.height)
         dtImages.data.data.forEach(row => {
             let image = new Image();
-            image.src = dtImages.data.data[0].cells[1].data.base64;
+            image.src = row.cells[1].data.base64;
+            image.style.transform = "scaleX(-1)";
             lienzo.drawImage(
                 image,
-                dtImages.data.data[0].cells[2].data,
-                dtImages.data.data[0].cells[3].data,
-                dtImages.data.data[0].cells[4].data,
-                dtImages.data.data[0].cells[5].data
+                row.cells[2].data,
+                row.cells[3].data,
+                row.cells[4].data,
+                row.cells[5].data
             );
         });
     });
-    
+
+    makeEditableDatatable(dtImages, {
+        inputs: [{
+            select: [2, 3, 4, 5],
+            nodeName: "INPUT",
+            attributes: {
+                type: "number",
+                min: "0"
+            }
+        }]
+    });
+
+
 });
 
 function addImages() {
@@ -79,10 +127,9 @@ function addImages() {
 function insertDtImages() {
     if (fileImages.files.length != inProcessImage.length) return;
     fileImages.value = "";
-    let zIndex = dtImages.data.data.length;
     dtImages.insert({
         data: inProcessImage.map(x => [
-            ++zIndex,
+            null,
             x.file,
             x.x,
             x.y,
@@ -91,4 +138,14 @@ function insertDtImages() {
         ])
     });
     inProcessImage = [];
+}
+
+function moveLayer(btn, move) {
+    let oldIndex = parseInt(btn.dataset.row);
+    let oldRow = dtImages.data.data[oldIndex];
+    let newIndex = parseInt(btn.dataset.row) + move;
+    let newRow = dtImages.data.data[newIndex];
+    dtImages.data.data[oldIndex] = newRow;
+    dtImages.data.data[newIndex] = oldRow;
+    dtImages.update();
 }
