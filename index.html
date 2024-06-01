@@ -10,6 +10,8 @@
     <script src="./JS/main.js"></script>
     <script src="./JS/datatable.js"></script>
     <script src="./JS/index.js"></script>
+    <script src="./JS/export.js"></script>
+    <script src="./JS/import.js"></script>
 </head>
 
 <body>
@@ -32,6 +34,11 @@
                 </tr>
             </thead>
         </table>
+    </section>
+    <section>
+        <button onclick="exportJSON()">Exportar JSON</button>
+        <button onclick="prepareImportJSON()">Importar JSON</button>
+        <input type="file" id="fileJSON" accept=".json" style="display: none;" onchange="importJSON()">
     </section>
     <section>
         <canvas id="canvasPreview"></canvas>

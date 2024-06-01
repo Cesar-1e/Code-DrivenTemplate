@@ -52,8 +52,19 @@ onload(() => {
                     attributes: {
                         height: "20px",
                         src: value.base64,
-                        title: value.file.name
+                        title: value.file.name,
+                        style: "border: 1px solid black"
                     }
+                }, {
+                    nodeName: "BUTTON",
+                    attributes: {
+                        "data-row": dataIndex,
+                        onclick: "deleteLayer(this)"
+                    },
+                    childNodes: [{
+                        nodeName: "#text",
+                        data: "❎"
+                    }]
                 }]
             }
         }, {
@@ -68,7 +79,6 @@ onload(() => {
         dtImages.data.data.forEach(row => {
             let image = new Image();
             image.src = row.cells[1].data.base64;
-            image.style.transform = "scaleX(-1)";
             lienzo.drawImage(
                 image,
                 row.cells[2].data,
@@ -148,4 +158,8 @@ function moveLayer(btn, move) {
     dtImages.data.data[oldIndex] = newRow;
     dtImages.data.data[newIndex] = oldRow;
     dtImages.update();
+}
+
+function deleteLayer(btn) {
+    dtImages.rows.remove(parseInt(btn.dataset.row));
 }
